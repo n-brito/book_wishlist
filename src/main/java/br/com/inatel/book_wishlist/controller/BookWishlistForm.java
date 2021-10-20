@@ -5,9 +5,11 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import br.com.inatel.book_wishlist.model.Book;
 import br.com.inatel.book_wishlist.model.BookWishlist;
+import br.com.inatel.book_wishlist.repository.BookWishlistRepository;
 
 
 
@@ -15,28 +17,48 @@ public class BookWishlistForm {
 
 	private String name;
 	
-	private Map<String, Book> books;
+	private List<BookForm> books;
 
 	public String getName() {
 		return name;
 	}
+	
+//	public String generateName(BookWishlist wishlist) { 
+//		name = wishlist.getName();
+//		return name;
+//	}
+//
+//	public List<Book> generateBooksList(BookWishlist wishlist) {
+//		books = new ArrayList<>();
+//		books = wishlist.getBookList();
+//		
+//		//validation here?
+//		
+//		return books;
+//	}
 
-	public Map<String, Book> getBooksList() {
+	public BookWishlist convert() {
+		
+		//validacao: nao criar wishlists c/ msm nome
+		
+		BookWishlist wishlist = new BookWishlist();
+		wishlist.setName(name);
+		if (books != null) {	
+			List<Book> bookList = books.stream().map(b -> b.convertToBook()).collect(Collectors.toList());
+			wishlist.setBookList(bookList);
+		}		
+		
+		return wishlist;
+//		return new BookWishlist(name, books);
+//		return new BookWishlist(generateName(wishlist), generateBooksList(wishlist));
+	}
+
+	public List<BookForm> getBooks() {
 		return books;
 	}
 
-	public List<Book> generateBooksList(BookWishlist wishlist) {
-		List<Book> books = new ArrayList<>();
-		
-		for (Map.Entry<String, Book> entry : this.books.entrySet()) {
-			Book book = new Book();
-			book = entry.getValue();
-			books.add(book);
-		}
-		
-		//validation here?
-		
-		return books;
+	public void setBooks(List<BookForm> books) {
+		this.books = books;
 	}
 	
 }

@@ -15,69 +15,82 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.inatel.book_wishlist.model.Book;
+import br.com.inatel.book_wishlist.model.BookWishlist;
 import br.com.inatel.book_wishlist.repository.BookRepository;
+import br.com.inatel.book_wishlist.repository.BookWishlistRepository;
+import br.com.inatel.book_wishlist.service.BookService;
 import br.com.inatel.book_wishlist.service.BookWishlistService;
 
 @RestController 
 @RequestMapping("/wishlist")
 public class BookWishlistController {
 	
-	@Autowired
-	private BookRepository bookRepository;
+//	@Autowired
+//	private BookRepository bookRepository;
+//	@Autowired
+//	private BookWishlistRepository bookWishlistRepository;
 	@Autowired
 	private BookWishlistService bookWishlistService;
+	@Autowired
+	private BookService bookService;
 	
 	private JSONObject books;
 	private JSONObject body;
 
-	//lists all books in the wishlist
-	@GetMapping()
-	public ResponseEntity<?> listAllBooks() {
+	//lists all wishlists 	
+	@GetMapping
+	public List<BookWishlistDto> listAllWishlists() {
+		List<BookWishlist> listOfWishlists = bookWishlistService.findBookWishlist();
+		listOfWishlists.forEach(l -> {
+//			l = bookWishlistService.findBookWishlistById(l.getId());
+//			List<BookDto> bookDto = l.getBookList().stream()
+//				.map(b-> {
+//					BookForm form = bookService.findBook(b.getIsbn13());
+//					form.setId(b.getId());
+//					return new BookDto(form);
+//				})
+//				.collect(Collectors.toList());
+//			l = new BookWishlistDto(wishlist, bookDto);
+			showWishlistById(l.getId());
+		});		
 		
-//			List<Stock> stockList = stockRepository.findAll(); // fazer como map
-//			Map<String, Book> wishlist = 
-		body = new JSONObject();		
-		body.put("name", wishlist.getName());
-		body.put("books", books);
-		if (books.isEmpty()) {
-			body = new JSONObject();
-			body.put("status", HttpStatus.NOT_FOUND.toString());
-			body.put("message", "Wishlist is empty");
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-		}
-		return ResponseEntity.status(HttpStatus.OK).body(body);
-//		return ResponseEntity.ok(wishlist.map(BookWishlistDto::new).collect(Collectors.toList()));
+		return BookWishlistDto.buildWishlists(listOfWishlists);
 	}
 	
-	//adds a new book to the wishlist
-	@PostMapping
-	@Transactional
-	public ResponseEntity<?> addBook(@RequestBody BookWishlistForm form, UriComponentsBuilder uriBuilder) {
+	@GetMapping("/{id}")
+	public BookWishlistDto showWishlistById(@PathVariable String id) {
+		BookWishlist wishlist = bookWishlistService.findBookWishlistById(id);
+		List<BookDto> bookDto = wishlist.getBookList().stream()
+			.map(b-> {
+				BookForm form = bookService.findBook(b.getIsbn13());
+				form.setId(b.getId());
+				return new BookDto(form);
+			})
+			.collect(Collectors.toList());
 		
-//		List<StockRegister> stockList = stockService.listStocks();
-//		List<String> stockIdList = stockList.stream().map(StockRegister::getId).collect(Collectors.toList());
-//		
-		//allows quote addition to proceed only if stockId passed exists on stock-manager application
-//		if (!stockIdList.contains(form.getStockId())) {
-//			return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Operation not allowed: No stock registered under the stockId " + form.getStockId());
-//		}
-							
-		Book stock = new Book(form.getStockId());
-		
-		stock.setQuotes(form.generateStockQuoteList(stock));
-			
-		stockRepository.save(stock);
-		
-		URI uri = uriBuilder.path("/stocks/{id}").buildAndExpand(form.getStockId()).toUri();
-
-		return ResponseEntity.created(uri).body(new StockDto(stock));		
+		return new BookWishlistDto(wishlist, bookDto);
 	}
+	
+	//creates a new wishlist
+	@PostMapping
+	public ResponseEntity<?> createWishlist(@RequestBody BookWishlistForm wishlistForm, UriComponentsBuilder uriBuilder) {
+		BookWishlist wishlist = wishlistForm.convert();
+		bookWishlistService.createWishlist(wishlist);
+		
+		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
+		
+		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist));
+	}
+	
+	
 			
 }

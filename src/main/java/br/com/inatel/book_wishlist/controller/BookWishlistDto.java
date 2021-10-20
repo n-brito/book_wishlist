@@ -1,7 +1,11 @@
 package br.com.inatel.book_wishlist.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import br.com.inatel.book_wishlist.model.Book;
 import br.com.inatel.book_wishlist.model.BookWishlist;
@@ -10,20 +14,45 @@ public class BookWishlistDto {
 
 	private String id;
 	private String name;
-	private Map<String, Book> books = new HashMap<>();
+	
+	private List<BookDto> books = new ArrayList<>();
+	
+	public BookWishlistDto(BookWishlist wishlist, List<BookDto> bookDtoList) {
+		this.id = wishlist.getId();
+		this.name = wishlist.getName();	
+		this.books = bookDtoList;
+//		 if (wishlist.getBookList() != null) {
+//			 this.books = wishlist.getBookList().stream()
+//			.map(BookDto::new).collect(Collectors.toList());
+//		}
+		
+	}
 	
 	public BookWishlistDto(BookWishlist wishlist) {
 		this.id = wishlist.getId();
 		this.name = wishlist.getName();	
-		
-		books.forEach((id, book) -> {
-			this.books.put(book.getId().toString(), book);
-		});		
+		 if (wishlist.getBookList() != null) {
+			 this.books = wishlist.getBookList().stream()
+			.map(BookDto::new).collect(Collectors.toList());
+		}
 		
 	}
 	
-	public Map<String, Book> getBooks() {
+	
+	public List<BookDto> getBooks() {
 		return books;
+	}
+
+	public String getId() {
+		return id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public static List<BookWishlistDto> buildWishlists(List<BookWishlist> wishlist) {
+		return wishlist.stream().map(BookWishlistDto::new).collect(Collectors.toList());
 	}
 	
 }

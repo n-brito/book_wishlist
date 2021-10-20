@@ -3,11 +3,14 @@ package br.com.inatel.book_wishlist.model;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 
+@Entity
 public class User {
 	
 	@Id 
@@ -17,7 +20,7 @@ public class User {
 	private String username;
 	private String password;
 	
-	@ManyToOne
+	@OneToMany
 	private List<BookWishlist> listOfWishlists;
 		
 	public String getId() {
