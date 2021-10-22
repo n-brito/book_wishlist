@@ -108,18 +108,48 @@ public class BookWishlistController {
 		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist));
 	}
 	
-	@PostMapping("/{id}")
-	public ResponseEntity<?> addBookToWishlist(@RequestBody BookWishlistForm wishlistForm, UriComponentsBuilder uriBuilder) {
-		BookWishlist wishlist = wishlistForm.convert();
-//		wishlist.setBookList(wishlist.getBookList().add(null));
-		bookWishlistService.createWishlist(wishlist);
+//	@PostMapping("/{id}")
+//	public ResponseEntity<?> addBookToWishlist(@RequestBody BookWishlistForm wishlistForm, UriComponentsBuilder uriBuilder) {
+//		BookWishlist wishlist = wishlistForm.convert();
+////		wishlist.setBookList(wishlist.getBookList().add(null));
+//		bookWishlistService.createWishlist(wishlist);
+//		
+//		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
+//		URI uri2 = uriBuilder.path(uri.getPath() + "/{isbn13}")
+//							.buildAndExpand(wishlist.getBookList()
+//							.get(wishlist.getBookList().size()-1).getIsbn13()).toUri();
+//		
+//		return ResponseEntity.created(uri2).body(new BookWishlistDto(wishlist));
+//	}
+	
+	
+//	
+	@PostMapping("/{id}/{isbn13}")
+	public ResponseEntity<?> addBookToWishlist(@RequestBody String isbn13, @RequestBody String wishlistId, UriComponentsBuilder uriBuilder) {
+		BookForm bookForm = bookService.findBook(isbn13);
+		Book book = bookForm.convertToBook();
+		BookWishlist wishlist = bookWishlistService.findBookWishlistById(wishlistId);
+//		wishlist.setBookList(wishlist.getBookList().add(book));
+		List<Book> list = wishlist.getBookList();
+		list.add(book);
+		wishlist.setBookList(list);
 		
-		URI uri = uriBuilder.path("/wishlist/{id}/{isbn13}").buildAndExpand(wishlist.getId()).toUri();
-		URI uri2 = uriBuilder.path("/wishlist/{id}/{isbn13}")
-							.buildAndExpand(wishlist.getBookList()
-							.get(wishlist.getBookList().size()-1).getIsbn13()).toUri();
+		List<BookDto> bookDto = wishlist.getBookList().stream()
+				.map(b-> {
+					BookForm form = bookService.findBook(b.getIsbn13());
+					form.setId(b.getId());
+					return new BookDto(form);
+				})
+				.collect(Collectors.toList());
+			
+//			return new BookWishlistDto(wishlist, bookDto);
 		
-		return ResponseEntity.created(uri2).body(new BookWishlistDto(wishlist));
+		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
+		URI uri2 = uriBuilder.path(uri.getPath() + "/{isbn13}").buildAndExpand(isbn13).toUri();
+//							.buildAndExpand(wishlist.getBookList()
+//							.get(wishlist.getBookList().size()-1).getIsbn13()).toUri();
+		
+		return ResponseEntity.created(uri2).body(new BookWishlistDto(wishlist, bookDto));
 	}
 			
 }

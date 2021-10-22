@@ -24,8 +24,8 @@ public class BookController {
 	
 //	@Autowired
 //	private BookRepository bookRepository;
-//	@Autowired
-//	private BookWishlistRepository bookWishlistRepository;
+	@Autowired
+	private BookWishlistRepository bookWishlistRepository;
 	@Autowired
 	private BookWishlistService bookService;
 	
@@ -34,6 +34,7 @@ public class BookController {
 //	//lists all books in the wishlist	
 //	@GetMapping
 //	public List<BookDto> listAllBooks() {
+//		bookService.findBookWishlistById(bookWishlistRepository.)
 //		List<Book> bookList = bookRepository.findAll();
 //		return BookDto.buildBookList(bookList);
 //	}

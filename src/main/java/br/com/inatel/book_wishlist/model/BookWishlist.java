@@ -80,5 +80,9 @@ public class BookWishlist {
 	public void setBookList(List<Book> bookList) {
 		this.bookList = bookList;
 	}
+//	
+//	public List<Book> addBookToBookList(Book book) {
+//		return bookList.add(book);
+//	}
 	
 }

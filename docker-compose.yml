@@ -1,0 +1,35 @@
+version: '3'
+
+services: 
+  mysql:
+    image: mysql:8
+    container_name: mysql-db
+    ports:
+      - "3306:3306"
+    environment: 
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=bootdb
+    networks:
+      - book-wishlist-network
+       
+  book-wishlist:
+    build:
+      dockerfile: ./Dockerfile
+      context: .
+    image: naiarabrito/book-wishlist
+    container_name: book-wishlist
+    ports:
+      - "8081:8081"
+    environment: 
+      - PORT=8081
+      - MYSQL_CONTAINER=mysql-db
+      - SPRING_PROFILES_ACTIVE=prod 
+      - WAIT_HOSTS=mysql:3306
+    networks:
+      - book-wishlist-network
+    depends_on: 
+      - mysql
+      
+networks:
+  book-wishlist-network:
+    driver: bridge

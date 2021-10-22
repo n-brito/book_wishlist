@@ -19,13 +19,13 @@ public class BookForm {
 	public Book convertToBook() {
 		
 		Book book = new Book(isbn13);
-//		book.setAuthors(authors);
-//		book.setTitle(title);
-//		book.setSubtitle(subtitle);
-//		book.setAuthors(authors);
-//		book.setYear(year);
-//		book.setPrice(price);
-//		book.setUrl(url);
+		book.setAuthors(authors);
+		book.setTitle(title);
+		book.setSubtitle(subtitle);
+		book.setAuthors(authors);
+		book.setYear(year);
+		book.setPrice(price);
+		book.setUrl(url);
 		return book;
 	}
 
