@@ -1,6 +1,8 @@
 package br.com.inatel.book_wishlist.config.swagger;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,7 +22,7 @@ public class SwaggerConfiguration {
 	public Docket bookWishlistApi() {
 		return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("br.com.iantel.book_wishlist"))
+                .apis(RequestHandlerSelectors.basePackage("br.com.inatel.book_wishlist"))
                 .paths(PathSelectors.ant("/**"))
                 .build()
                 .ignoredParameterTypes(User.class)
@@ -34,5 +36,7 @@ public class SwaggerConfiguration {
                                     .required(false)
                                     .build()));
 	}
+	
+
 
 }

@@ -32,6 +32,15 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private UserRepository userRepository;
 	
+	 private static final String[] AUTH_WHITELIST = {
+	
+	            // -- swagger ui
+	            "/swagger-resources/**",
+	            "/**",
+	            "/v2/api-docs",
+	            "/webjars/**"
+	    };
+	
 	@Override
 	@Bean
 	protected AuthenticationManager authenticationManager() throws Exception {
@@ -50,6 +59,7 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests()
 		.antMatchers(HttpMethod.POST, "/auth").permitAll()
 		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+//		.antMatchers(AUTH_WHITELIST).permitAll()
 		.anyRequest().authenticated()
 //		.and().formLogin();
 		.and().csrf().disable()
@@ -61,8 +71,9 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring()
-        .antMatchers("/swagger-ui.html", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
+        .antMatchers("/**", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
 	}
+	
 	
 //	public static void main(String[] args) {
 //		System.out.println(new BCryptPasswordEncoder().encode("123"));
