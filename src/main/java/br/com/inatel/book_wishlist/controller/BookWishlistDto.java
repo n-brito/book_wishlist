@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+
 import br.com.inatel.book_wishlist.model.Book;
 import br.com.inatel.book_wishlist.model.BookWishlist;
 
@@ -34,8 +36,7 @@ public class BookWishlistDto {
 		 if (wishlist.getBookList() != null) {
 			 this.books = wishlist.getBookList().stream()
 			.map(BookDto::new).collect(Collectors.toList());
-		}
-		
+		}		
 	}
 	
 	
@@ -51,8 +52,9 @@ public class BookWishlistDto {
 		return name;
 	}
 
-	public static List<BookWishlistDto> buildWishlists(List<BookWishlist> wishlist) {
-		return wishlist.stream().map(BookWishlistDto::new).collect(Collectors.toList());
+	public static Page<BookWishlistDto> buildWishlists(Page<BookWishlist> wishlist) {
+//		return wishlist.stream().map(BookWishlistDto::new).collect(Collectors.toList());
+		return wishlist.map(BookWishlistDto::new);
 	}
 	
 }

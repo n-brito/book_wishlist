@@ -15,6 +15,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.inatel.book_wishlist.adapter.ItBookstoreAdapter;
@@ -33,8 +35,8 @@ public class BookWishlistService {
 	@Autowired
 	private BookRepository bookRepository;
 	
-	public List<BookWishlist> findBookWishlist() {
-		return wishlistRepository.findAll();
+	public Page<BookWishlist> findBookWishlist(Pageable pagination) {
+		return wishlistRepository.findAll(pagination);
 	}
 	
 	public BookWishlist findBookWishlistById(String id) {		
@@ -42,11 +44,14 @@ public class BookWishlistService {
 		if (optional.isPresent()) {
 			return optional.get();
 		}
-		throw new ModelNotFoundException("id", "No wishlist found with this id: " + id); // devolver exceção
+		throw new ModelNotFoundException("id", "No wishlist found with this id: " + id); 
 	}
 	
 	public BookWishlist createWishlist(BookWishlist wishlist) {
 		BookWishlist temporaryWishlist = wishlistRepository.save(wishlist);
+		
+		//validate: not allowed if wishlist with the id already exists
+		
 		if (temporaryWishlist.getBookList() != null) {
 			temporaryWishlist.getBookList().forEach(b -> {
 				bookRepository.save(b);

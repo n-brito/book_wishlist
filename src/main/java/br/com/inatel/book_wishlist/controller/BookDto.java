@@ -36,15 +36,16 @@ public class BookDto {
 //	@JsonIgnore
 //	private String parentWishlistName;
 	
-	public BookDto(Book book) {
+	
+	public BookDto(Book book) {		//esse q ta sendo chamado p/ print
 		this.id = book.getId();
 		this.isbn13 = book.getIsbn13();
-//		this.title = book.getTitle();
-//		this.subtitle = book.getSubtitle();
-//		this.authors = book.getAuthors();
-//		this.year = book.getYear();
-//		this.price = book.getPrice();
-		this.url = url + "/" + book.getIsbn13();
+		this.title = book.getTitle();
+		this.subtitle = book.getSubtitle();
+		this.authors = book.getAuthors();
+		this.year = book.getYear();
+		this.price = book.getPrice();
+		this.url = url + "/books/" + book.getIsbn13();
 //		this.wishlist = book.getWishlist();
 //		this.parentWishlistName = book.getParentWishlistName();
 //		this.parentWishlistName = book.getWishlist().getName();
@@ -58,13 +59,14 @@ public class BookDto {
 		this.authors = book.getAuthors();
 		this.year = book.getYear();
 		this.price = book.getPrice();
-		this.url = url + "/" + book.getIsbn13();
+		this.url = url + "/books/" + book.getIsbn13();
 //		this.wishlist = book.getWishlist();
 //		this.parentWishlistName = book.getParentWishlistName();
 //		this.parentWishlistName = book.getWishlist().getName();
 	}
-
-	public static List<BookDto> buildBookList(List<Book> list) {
+	
+//static
+	public  List<BookDto> buildBookList(List<Book> list) {
 //		list.forEach(b -> {
 //			b.parentWishlistName = book.getWishlist().getName();
 //		});
