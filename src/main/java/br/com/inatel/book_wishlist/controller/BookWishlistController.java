@@ -2,6 +2,8 @@ package br.com.inatel.book_wishlist.controller;
 
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -62,23 +64,23 @@ public class BookWishlistController {
 //		Pageable pagination = PageRequest.of(page, itemsPerPage, Direction.ASC, listingOrder);
 		
 		Page<BookWishlist> listOfWishlists = bookWishlistService.findBookWishlist(pagination);
+			
+		List<BookWishlist> list = listOfWishlists.getContent();
 		
-//		List<BookWishlist> listOfWishlists = bookWishlistService.findBookWishlist();
+		Map<BookWishlist, List<BookDto>> booksMap = new HashMap<>();
 		
-		listOfWishlists.forEach(l -> {
-			l = bookWishlistService.findBookWishlistById(l.getId());
+		list.forEach(l -> {
 			List<BookDto> bookDto = l.getBookList().stream()
-				.map(b-> {
-					BookForm form = bookService.findBook(b.getIsbn13());
-					form.setId(b.getId());
-					return new BookDto(form);
-				})
-				.collect(Collectors.toList());
-			List<Book> books = l.getBookList();
-			bookDto.forEach(b -> b.buildBookList(books));
+					.map(b-> {
+						BookForm form = bookService.findBook(b.getIsbn13());
+						form.setId(b.getId());
+						return new BookDto(form);
+					})
+					.collect(Collectors.toList());
+			booksMap.put(l, bookDto);			
 		});		
 		
-		return BookWishlistDto.buildWishlists(listOfWishlists);
+		return listOfWishlists.map(w -> new BookWishlistDto(w, booksMap.get(w)));
 	}
 	
 	//shows a specific wishlist by id
@@ -103,37 +105,6 @@ public class BookWishlistController {
 		BookWishlist wishlist = wishlistForm.convert();
 		bookWishlistService.createWishlist(wishlist);
 		
-		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
-		
-		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist));
-	}
-	
-//	@PostMapping("/{id}")
-//	public ResponseEntity<?> addBookToWishlist(@RequestBody BookWishlistForm wishlistForm, UriComponentsBuilder uriBuilder) {
-//		BookWishlist wishlist = wishlistForm.convert();
-////		wishlist.setBookList(wishlist.getBookList().add(null));
-//		bookWishlistService.createWishlist(wishlist);
-//		
-//		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
-//		URI uri2 = uriBuilder.path(uri.getPath() + "/{isbn13}")
-//							.buildAndExpand(wishlist.getBookList()
-//							.get(wishlist.getBookList().size()-1).getIsbn13()).toUri();
-//		
-//		return ResponseEntity.created(uri2).body(new BookWishlistDto(wishlist));
-//	}
-	
-	
-//	
-	@PostMapping("/{id}/{isbn13}")
-	public ResponseEntity<?> addBookToWishlist(@RequestBody String isbn13, @RequestBody String wishlistId, UriComponentsBuilder uriBuilder) {
-		BookForm bookForm = bookService.findBook(isbn13);
-		Book book = bookForm.convertToBook();
-		BookWishlist wishlist = bookWishlistService.findBookWishlistById(wishlistId);
-//		wishlist.setBookList(wishlist.getBookList().add(book));
-		List<Book> list = wishlist.getBookList();
-		list.add(book);
-		wishlist.setBookList(list);
-		
 		List<BookDto> bookDto = wishlist.getBookList().stream()
 				.map(b-> {
 					BookForm form = bookService.findBook(b.getIsbn13());
@@ -141,15 +112,23 @@ public class BookWishlistController {
 					return new BookDto(form);
 				})
 				.collect(Collectors.toList());
-			
-//			return new BookWishlistDto(wishlist, bookDto);
 		
 		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
-		URI uri2 = uriBuilder.path(uri.getPath() + "/{isbn13}").buildAndExpand(isbn13).toUri();
-//							.buildAndExpand(wishlist.getBookList()
-//							.get(wishlist.getBookList().size()-1).getIsbn13()).toUri();
 		
-		return ResponseEntity.created(uri2).body(new BookWishlistDto(wishlist, bookDto));
+		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist, bookDto));
+	}
+		
+	
+	@PostMapping("/{id}/book/{isbn13}")
+	public ResponseEntity<?> addBookToWishlist(@PathVariable(name = "id") String wishlistId, @PathVariable String isbn13, UriComponentsBuilder uriBuilder) {
+		BookForm bookForm = bookService.findBook(isbn13);
+		Book book = bookForm.convertToBook();
+		BookWishlist wishlist = bookWishlistService.addBookToWishlist(wishlistId, book);
+		
+		URI uri = uriBuilder.path("/{id}/book/{isbn13}").buildAndExpand(wishlist.getId(), isbn13).toUri();
+		
+		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist));
+			
 	}
 			
 }

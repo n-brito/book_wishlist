@@ -66,7 +66,7 @@ public class BookDto {
 	}
 	
 //static
-	public static List<BookDto> buildBookList(List<Book> list) {
+	public List<BookDto> buildBookList(List<Book> list) {
 //		list.forEach(b -> {
 //			b.parentWishlistName = book.getWishlist().getName();
 //		});

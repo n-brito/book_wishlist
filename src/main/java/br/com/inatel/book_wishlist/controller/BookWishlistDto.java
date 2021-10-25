@@ -52,9 +52,10 @@ public class BookWishlistDto {
 		return name;
 	}
 
-	public static Page<BookWishlistDto> buildWishlists(Page<BookWishlist> wishlist) {
-//		return wishlist.stream().map(BookWishlistDto::new).collect(Collectors.toList());
-		return wishlist.map(BookWishlistDto::new);
-	}
+//	public static Page<BookWishlistDto> buildWishlists(Page<BookWishlist> wishlist) {
+//		
+////		return wishlist.stream().map(BookWishlistDto::new).collect(Collectors.toList());
+//		return wishlist.map(BookWishlistDto::new);
+//	}
 	
 }

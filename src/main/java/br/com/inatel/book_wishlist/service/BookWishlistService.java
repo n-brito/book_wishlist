@@ -59,5 +59,11 @@ public class BookWishlistService {
 		}
 		return temporaryWishlist;
 	}
+	
+	public BookWishlist addBookToWishlist(String id, Book book) {		
+		BookWishlist temporaryWishlist = findBookWishlistById(id);
+		temporaryWishlist.getBookList().add(book);
+		return wishlistRepository.save(temporaryWishlist);
+	}
 
 }
