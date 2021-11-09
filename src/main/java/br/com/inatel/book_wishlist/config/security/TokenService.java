@@ -34,13 +34,13 @@ public class TokenService {
 	}
 
 	public boolean isTokenValid(String token) {
+		boolean isValid = false;
 		try {
 			Jwts.parser().setSigningKey(this.secret).parseClaimsJws(token);
-			return true;
+			isValid = true;
 		} catch (Exception e) {
-			return false;
 		}
-		
+		return isValid;
 	}
 
 	public String getUserId(String token) {

@@ -41,8 +41,7 @@ public class Book {
 	private String authors;
 	private String year;
 	private String price;
-	private String url; //pode ser tipo "${it-bookstore.url}" + "isbn13" ? 
-						//url da api ta defasada
+	private String url; 
 	
 	
 	

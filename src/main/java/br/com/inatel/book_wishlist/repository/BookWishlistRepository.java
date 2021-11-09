@@ -11,7 +11,8 @@ import br.com.inatel.book_wishlist.model.BookWishlist;
 @Repository
 public interface BookWishlistRepository extends JpaRepository<BookWishlist, String> {
 
-	BookWishlist findByName(String name);
+//	BookWishlist findByName(String name);
 	Optional<BookWishlist> findById(String id);
+	Optional<BookWishlist> findByName(String name);
 	
 }

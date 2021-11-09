@@ -28,14 +28,15 @@ public class ValidationErrorHandler {
 		fieldErrors.forEach(e -> {
 			String message = messageSource.getMessage(e, LocaleContextHolder.getLocale());
 			ValidationErrorDto error = new ValidationErrorDto(e.getField(), message);
+			dto.add(error);
 		});
 		
 		return dto;
 	}
 	
 	@ResponseStatus(code = HttpStatus.NOT_FOUND)
-	@ExceptionHandler(ModelNotFoundException.class)
-	public List<ValidationErrorDto> handleErrors(ModelNotFoundException exception) {
+	@ExceptionHandler(ModelException.class)
+	public List<ValidationErrorDto> handleErrors(ModelException exception) {
 		List<ValidationErrorDto> dto = new ArrayList<>();
 		
 		dto.add(new ValidationErrorDto(exception.getField(), exception.getMessage()));

@@ -1,10 +1,10 @@
 package br.com.inatel.book_wishlist.config.validation;
 
-public class ModelNotFoundException extends RuntimeException{
+public class ModelException extends RuntimeException{
 	
 	private String field;
 	
-	public ModelNotFoundException(String field, String error) {
+	public ModelException(String field, String error) {
 		super(error);
 		this.field = field;
 	}

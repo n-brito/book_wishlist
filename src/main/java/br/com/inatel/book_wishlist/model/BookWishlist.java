@@ -37,6 +37,7 @@ public class BookWishlist {
 	
 	//a wishlist belongs to only one user
 	@ManyToOne
+	@JoinColumn(name = "owner_id")
 	private User owner;
 	
 	//a book can be added to different wishlists by the same user or by different users 
@@ -55,12 +56,22 @@ public class BookWishlist {
 		this.name = name;
 	}
 	
-//	public BookWishlist(String name, List<Book> bookList) {
-////		this.id = UUID.randomUUID().toString();
-//		this.name = name;
-//		this.bookList = bookList;
-//	}
+	public List<String> getListOfIsbn13() {
+		List<String> isbn13list = new ArrayList<>();
+		this.bookList.forEach(b-> {
+			isbn13list.add(b.getIsbn13());
+		});
+		return isbn13list;
+	}
 
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
+	}
+	
 	public String getId() {
 		return id;
 	}

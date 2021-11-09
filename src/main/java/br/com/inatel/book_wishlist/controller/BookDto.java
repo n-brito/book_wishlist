@@ -24,17 +24,10 @@ public class BookDto {
 	private String authors;
 	private String year;
 	private String price;
+	
 	@Autowired
 	@Value("${it-bookstore.url}")
-	private String url = "https://api.itbook.store/1.0"; //pode ser tipo "${it-bookstore.url}" + "isbn13" ? 
-						//url da api ta defasada
-	
-//	@ManyToOne
-//	@JsonBackReference //avoiding infinite recursion
-//	private BookWishlist wishlist;
-	
-//	@JsonIgnore
-//	private String parentWishlistName;
+	private String url; 
 	
 	
 	public BookDto(Book book) {		//esse q ta sendo chamado p/ print
@@ -46,9 +39,6 @@ public class BookDto {
 		this.year = book.getYear();
 		this.price = book.getPrice();
 		this.url = url + "/books/" + book.getIsbn13();
-//		this.wishlist = book.getWishlist();
-//		this.parentWishlistName = book.getParentWishlistName();
-//		this.parentWishlistName = book.getWishlist().getName();
 	}
 	
 	public BookDto(BookForm book) {
@@ -60,20 +50,12 @@ public class BookDto {
 		this.year = book.getYear();
 		this.price = book.getPrice();
 		this.url = url + "/books/" + book.getIsbn13();
-//		this.wishlist = book.getWishlist();
-//		this.parentWishlistName = book.getParentWishlistName();
-//		this.parentWishlistName = book.getWishlist().getName();
 	}
 	
-//static
 	public List<BookDto> buildBookList(List<Book> list) {
-//		list.forEach(b -> {
-//			b.parentWishlistName = book.getWishlist().getName();
-//		});
 		return list.stream().map(BookDto::new).collect(Collectors.toList());
 	}
 
-	
 	public String getId() {
 		return id;
 	}
@@ -109,17 +91,5 @@ public class BookDto {
 	public String getUrl() {
 		return url;
 	}
-
-//	public BookWishlist getWishlist() {
-//		return wishlist;
-//	}
-//
-//	public String getParentWishlistName() {
-//		return parentWishlistName;
-//	}
-	
-//	public void setParentWishlistName() {
-//		this.parentWishlistName = ;
-//	}
 
 }

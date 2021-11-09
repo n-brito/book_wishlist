@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.LazyCollection;
@@ -29,15 +28,23 @@ public class User implements UserDetails {
 	private String id;
 	
 	private String username;
+	
 	private String password;
 	
 	@ManyToMany  //(fetch = FetchType.EAGER)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	private List<Profile> profiles;
 	
-	@OneToMany
-	private List<BookWishlist> listOfWishlists;
+	
 		
+	public List<Profile> getProfiles() {
+		return profiles;
+	}
+
+	public void setProfiles(List<Profile> profiles) {
+		this.profiles = profiles;
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -60,14 +67,6 @@ public class User implements UserDetails {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public List<BookWishlist> getListOfWishlists() {
-		return listOfWishlists;
-	}
-
-	public void setListOfWishlists(List<BookWishlist> listOfWishlists) {
-		this.listOfWishlists = listOfWishlists;
 	}
 
 	public User() {

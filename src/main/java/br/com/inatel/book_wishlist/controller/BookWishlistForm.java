@@ -39,18 +39,17 @@ public class BookWishlistForm {
 
 	public BookWishlist convert() {
 		
-		//validacao: nao criar wishlists c/ msm nome
+		//validation: no  wishlists w/ the same name
 		
 		BookWishlist wishlist = new BookWishlist();
 		wishlist.setName(name);
+				
 		if (books != null) {	
 			List<Book> bookList = books.stream().map(b -> b.convertToBook()).collect(Collectors.toList());
 			wishlist.setBookList(bookList);
 		}		
 		
 		return wishlist;
-//		return new BookWishlist(name, books);
-//		return new BookWishlist(generateName(wishlist), generateBooksList(wishlist));
 	}
 
 	public List<BookForm> getBooks() {
