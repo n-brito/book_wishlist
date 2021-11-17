@@ -27,7 +27,7 @@ public class BookDto {
 	
 	@Autowired
 	@Value("${it-bookstore.url}")
-	private String url; 
+	private String url = "https://api.itbook.store/1.0"; 
 	
 	
 	public BookDto(Book book) {		//esse q ta sendo chamado p/ print

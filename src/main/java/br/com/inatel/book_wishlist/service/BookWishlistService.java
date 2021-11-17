@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import br.com.inatel.book_wishlist.config.validation.ModelException;
 import br.com.inatel.book_wishlist.controller.BookForm;
 import br.com.inatel.book_wishlist.model.Book;
 import br.com.inatel.book_wishlist.model.BookWishlist;
+import br.com.inatel.book_wishlist.model.User;
 import br.com.inatel.book_wishlist.repository.BookRepository;
 import br.com.inatel.book_wishlist.repository.BookWishlistRepository;
 
@@ -35,8 +37,11 @@ public class BookWishlistService {
 	@Autowired
 	private BookRepository bookRepository;
 	
-	public Page<BookWishlist> findBookWishlist(Pageable pagination) {
-		return wishlistRepository.findAll(pagination);
+	public Page<BookWishlist> findBookWishlist(Pageable pagination, User user) {
+		BookWishlist bookWishlist = new BookWishlist(); 
+		bookWishlist.setOwner(user);
+		Example<BookWishlist> filter = Example.of(bookWishlist);
+		return wishlistRepository.findAll(filter, pagination);
 	}
 	
 	public BookWishlist findBookWishlistById(String id) {		
@@ -110,7 +115,6 @@ public class BookWishlistService {
 		BookWishlist temporaryWishlist = findBookWishlistById(id);
 		Optional<Book> book = temporaryWishlist.getBookList().stream().filter(b -> b.getIsbn13().equals(isbn13)).findAny();
 		if(book.isPresent()) {
-//			temporaryWishlist.getBookList().remove(book.get());
 			return book.get();
 		}
 		throw new ModelException("isbn13", "No book found with this isbn13: " + isbn13);

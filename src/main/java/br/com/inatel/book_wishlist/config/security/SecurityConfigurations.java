@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import br.com.inatel.book_wishlist.repository.UserRepository;
 @EnableWebSecurity
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@Profile("prod")
 public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
@@ -36,15 +38,7 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	
 	@Autowired
 	private UserRepository userRepository;
-	
-	 private static final String[] AUTH_WHITELIST = {
-	
-	            // -- swagger ui
-	            "/swagger-resources/**",
-	            "/**",
-	            "/v2/api-docs",
-	            "/webjars/**"
-	    };
+
 	
 	@Override
 	@Bean
@@ -61,13 +55,20 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	//authorization configuration
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests()
-		.antMatchers(HttpMethod.POST, "/auth").permitAll()
-		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
-		.anyRequest().authenticated()
-		.and().csrf().disable()
-		.exceptionHandling().authenticationEntryPoint(entrypoint)
+//		http.authorizeRequests()
+//		.antMatchers(HttpMethod.POST, "/auth").permitAll()
+//		.antMatchers(HttpMethod.POST, "/signup").permitAll()
+//		.antMatchers(HttpMethod.GET, "/actuator/**").permitAll()
+//		.anyRequest().authenticated()
+//		.and().csrf().disable()
+//		.exceptionHandling().authenticationEntryPoint(entrypoint)
+//		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//		.and().addFilterBefore(new AuthenticationViaTokenFilter(tokenService, userRepository), UsernamePasswordAuthenticationFilter.class);
+				
+		http.csrf().disable().exceptionHandling().authenticationEntryPoint(entrypoint)
 		.and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+		.and().authorizeRequests()
+		.anyRequest().authenticated()
 		.and().addFilterBefore(new AuthenticationViaTokenFilter(tokenService, userRepository), UsernamePasswordAuthenticationFilter.class);
 	}
 	
@@ -75,7 +76,7 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		web.ignoring()
-        .antMatchers("/**", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
+        .antMatchers("/signup", "/auth", "/actuator/**", "/v2/api-docs", "/webjars/**", "/configuration/**", "/swagger-resources/**");
 	}
 	
 	

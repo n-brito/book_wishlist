@@ -2,6 +2,9 @@ package br.com.inatel.book_wishlist.controller;
 
 import java.net.URI;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +16,8 @@ import javax.validation.Valid;
 
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,8 +36,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import br.com.inatel.book_wishlist.config.validation.ModelException;
@@ -44,9 +51,11 @@ import br.com.inatel.book_wishlist.repository.BookWishlistRepository;
 import br.com.inatel.book_wishlist.service.BookService;
 import br.com.inatel.book_wishlist.service.BookWishlistService;
 import br.com.inatel.book_wishlist.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController 
 @RequestMapping("/wishlist")
+@Slf4j
 public class BookWishlistController {
 	
 	@Autowired
@@ -58,22 +67,36 @@ public class BookWishlistController {
 	@Autowired
 	private UserService userService;
 	
-//	private JSONObject books;
-//	private JSONObject body;
+	@Autowired
+	@Value("${spring.datasource.url}")
+	private String connectionUrl = "jdbc:mysql://${MYSQL_CONTAINER}:3306/bootdb?useSSL=false&allowPublicKeyRetrieval=true";
+	
+	Logger log = LoggerFactory.getLogger(BookWishlistController.class);
 
 	//lists all wishlists 	
 	@GetMapping
 	@Cacheable(value = "listOfWishlists")
-	public Page<BookWishlistDto> listAllWishlists(@PageableDefault(page = 0, size = 10) Pageable pagination) { //@RequestParam int page, 
+	public Page<BookWishlistDto> listAllWishlists(@PageableDefault(page = 0, size = 10) Pageable pagination){ //@RequestParam int page, 
 		
+//		try (Connection conn = DriverManager.getConnection(connectionUrl, "root", "root")){
+//			if (conn.isValid(0))
+//			System.out.println("mysql running");
+//		} catch (Exception e) {
+//			throw new ModelException("mysql", "No connection found with MySQL database");
+//		}
+		
+				
 		if (pagination.getPageSize() > 20) {
 			throw new ModelException("size", "Maximum number of items allowed per page is 20"); 
 		}
 		
-		getAutehticatedUser();
+		User authUser = userService.findUserByUsername(getAutehticatedUser().getUsername());
 		
-		Page<BookWishlist> listOfWishlists = bookWishlistService.findBookWishlist(pagination);
-			
+		Page<BookWishlist> listOfWishlists = bookWishlistService.findBookWishlist(pagination, authUser);
+		System.out.println("lists of: " + authUser.getUsername());
+		
+		log.info("Listing all wishlists from user: " + authUser.getUsername());	
+		
 		List<BookWishlist> list = listOfWishlists.getContent();
 		
 		Map<BookWishlist, List<BookDto>> booksMap = new HashMap<>();
@@ -104,6 +127,8 @@ public class BookWishlistController {
 			})
 			.collect(Collectors.toList());
 		
+		log.info("Listing all books from wishlist with id: " + id);
+		
 		return new BookWishlistDto(wishlist, bookDto);
 	}
 	
@@ -128,6 +153,8 @@ public class BookWishlistController {
 		
 		URI uri = uriBuilder.path("/wishlist/{id}").buildAndExpand(wishlist.getId()).toUri();
 		
+		log.info("Creating new wishlist: " + wishlist.getName());
+		
 		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist, bookDto));
 	}
 		
@@ -136,11 +163,18 @@ public class BookWishlistController {
 	@PostMapping("/{id}/book/{isbn13}")
 	@CacheEvict(value = "listOfWishlists", allEntries = true)
 	public ResponseEntity<?> addBookToWishlist(@PathVariable(name = "id") String wishlistId, @PathVariable String isbn13, UriComponentsBuilder uriBuilder) {
+		
+		if(isbn13 == null ) {
+			throw new ModelException("isbn13", "Please provide a valid isbn13 code and try again");
+		}
+		
 		BookForm bookForm = bookService.findBook(isbn13);
 		Book book = bookForm.convertToBook();
 		BookWishlist wishlist = bookWishlistService.addBookToWishlist(wishlistId, book);
 		
 		URI uri = uriBuilder.path("/{id}/book/{isbn13}").buildAndExpand(wishlist.getId(), isbn13).toUri();
+		
+		log.info("Adding book with isbn13 " + isbn13 + " to wishlist " + wishlist.getName());
 				
 		return ResponseEntity.created(uri).body(new BookWishlistDto(wishlist));
 			
@@ -150,6 +184,8 @@ public class BookWishlistController {
 	@DeleteMapping("/{id}")
 	@CacheEvict(value = "listOfWishlists", allEntries = true)
 	public ResponseEntity<?> deleteWishlist(@PathVariable(name = "id") String wishlistId) {
+		
+		log.info("Deleting wishlist by id " + wishlistId);
 		
 		bookWishlistService.deleteWishlist(wishlistId);
 		
@@ -161,6 +197,8 @@ public class BookWishlistController {
 	@CacheEvict(value = "listOfWishlists", allEntries = true)
 	public ResponseEntity<?> deleteBookFromWishlist(@PathVariable(name = "id") String wishlistId, @PathVariable String bookId, UriComponentsBuilder uriBuilder) {
  
+		log.info("Deleting book with id " + bookId + " from wishlist by id " + wishlistId);
+		
 		bookWishlistService.deleteBook(wishlistId, bookId);
 		
 		return ResponseEntity.noContent().build();
@@ -171,6 +209,8 @@ public class BookWishlistController {
 	@CacheEvict(value = "listOfWishlists", allEntries = true)
 	public ResponseEntity<?> showBookFromWishlist(@PathVariable(name = "id") String wishlistId, @PathVariable String isbn13, UriComponentsBuilder uriBuilder) {
  
+		log.info("Showing book with isbn13 " + isbn13 + " from wishlist by id " + wishlistId);
+		
 		BookWishlist wishlist = bookWishlistService.findBookWishlistById(wishlistId);
 		Book book = bookWishlistService.showBookByIsbn13(wishlistId, isbn13);
 		
@@ -180,8 +220,27 @@ public class BookWishlistController {
 			
 	}
 	
+//	@RequestMapping(value = "/{id}/book/")
+//	public ResponseEntity<?> handlingInvalidPath (@PathVariable(name = "id") String wishlistId) {
+//		bookWishlistService.findBookWishlistById(wishlistId);
+//		throw new ModelException("isbn13", "Please provide a valid isbn13 code and try again");
+////		throw new ModelException("url", "Please check if you have type all url fields correctly");
+//	}
+	
+	@RequestMapping(value = "/**/{regex:[-a-zA-Z0-9]*}")
+	public ResponseEntity<?> handlingInvalidPaths () {
+		log.info("An invalid endpoind path was typed");
+//		bookWishlistService.findBookWishlistById(wishlistId);
+//		throw new ModelException("isbn13", "Please provide a valid isbn13 code and try again");
+		throw new ModelException("url", "Please check if you have type all url fields correctly");
+	}
+	
+	//authenticating current user
+	@CacheEvict(value = "listOfWishlists", allEntries = true)
 	private User getAutehticatedUser() {
 		String username = SecurityContextHolder.getContext().getAuthentication().getName();
+		System.out.println(username);
+		log.info("Getting authenticated user: " + username);
 		return userService.findUserByUsername(username);
 	}
 			

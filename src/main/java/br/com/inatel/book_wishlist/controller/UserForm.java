@@ -21,7 +21,7 @@ public class UserForm {
 	@Size(min = 4, max = 15)
 	private String username;
 	
-	@NotBlank(message = "Passwork must be between 4 to 15 characters and not be blank")
+	@NotBlank(message = "Password must be between 4 to 15 characters and not be blank")
 	@Size(min = 4, max = 15)
 	private String password;	
 	
